@@ -1,4 +1,5 @@
 # import
+from genericpath import isfile
 import pandas as pd
 import numpy as np
 import pytorch_lightning as pl
@@ -8,6 +9,8 @@ import torch
 from sklearn.model_selection import train_test_split
 from torch.utils.data import Dataset, DataLoader
 from pytorch_lightning.callbacks import ModelCheckpoint
+import os
+from os.path import join
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -100,8 +103,8 @@ class Net(pl.LightningModule):
 if __name__ == '__main__':
     # parameters
     random_seed = 0
-    train_csv = './data/covid.train.csv'
-    test_csv = './data/covid.test.csv'
+    data_path = 'data/'
+    dataset_name = 'ml2021spring-hw1'
     val_size = 0.2
     batch_size = 32
     lr = 0.002
@@ -111,16 +114,27 @@ if __name__ == '__main__':
     max_epochs = 100
     save_path = 'save/'
 
+    # download data
+    if not isfile(join(data_path, '{}.zip'.format(dataset_name))):
+        os.system(
+            command='kaggle competitions download -c {} -p {}'.format(dataset_name, data_path))
+
+    # unzip data
+    os.system('unzip {}/{}.zip -d {}'.format(data_path, dataset_name, data_path))
+
     # set random seed
     pl.seed_everything(seed=random_seed)
 
     # read csv
-    train_data = pd.read_csv(train_csv, dtype=np.float32)
-    test_data = pd.read_csv(test_csv, dtype=np.float32)
+    train_data = pd.read_csv(
+        join(data_path, 'covid.train.csv'), dtype=np.float32)
+    test_data = pd.read_csv(
+        join(data_path, 'covid.test.csv'), dtype=np.float32)
 
     # get feature and label
-    x_train, y_train = train_data.iloc[:, list(range(1,41))+[58,76]].values, train_data.iloc[:, -1].values
-    x_test = test_data.iloc[:, list(range(1,41))+[58,76]].values
+    x_train, y_train = train_data.iloc[:, list(
+        range(1, 41))+[58, 76]].values, train_data.iloc[:, -1].values
+    x_test = test_data.iloc[:, list(range(1, 41))+[58, 76]].values
     y_train = y_train.reshape(-1, 1)
 
     # split train to val
