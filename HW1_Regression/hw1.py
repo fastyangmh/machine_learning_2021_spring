@@ -120,7 +120,7 @@ if __name__ == '__main__':
             command='kaggle competitions download -c {} -p {}'.format(dataset_name, data_path))
 
     # unzip data
-    os.system('unzip {}/{}.zip -d {}'.format(data_path, dataset_name, data_path))
+    os.system('unzip -on {}/{}.zip -d {}'.format(data_path, dataset_name, data_path))
 
     # set random seed
     pl.seed_everything(seed=random_seed)
